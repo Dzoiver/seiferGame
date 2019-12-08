@@ -17,7 +17,7 @@
 var player;
 var fightFactor = 0;
 var fx;
-var randFightnumber = Phaser.Math.Between(300, 1200);
+var randFightnumber = Phaser.Math.Between(200, 1000);
 
 // var Enemy = new Class
 
@@ -34,7 +34,9 @@ function worldScene ()
 
 preload: function ()
 {
-	this.load.image('background', 'assets/Cover.png');
+	this.load.image('fightBar', 'assets/fightStatus.png');
+	this.load.image('energyBar', 'assets/energyBar.png');
+	this.load.image('enemy', 'assets/svort.png');
 	 this.load.spritesheet('dude', 
         'assets/dude.png',
         { frameWidth: 32, frameHeight: 48 }
@@ -55,7 +57,7 @@ create: function ()
 	var backgroundLayer = map.createDynamicLayer('Background', tileset, 0, 0);
 	var blockedLayer = map.createDynamicLayer('blocked', tileset, 0, 0);
 
-	fx = this.sound.add('sfx', {volume: 0.2});
+	fx = this.sound.add('sfx', {volume: 0.1});
 	fx.play();
 	// this.physics.add.image(500, 400, 'background').setScale(1.5);
 
@@ -126,10 +128,69 @@ update: function (time, delta)
         }
 },
 });
+var Enemy = new Phaser.Class({
+	Extends: Phaser.GameObjects.Image,
+
+	initialize:
+
+	function Enemy (scene)
+	{
+		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'enemy');
+	},
+
+	spawn: function ()
+	{
+		this.setPosition(400, 200);
+	}
+});
+var fightBar = new Phaser.Class({
+	Extends: Phaser.GameObjects.Image,
+
+	initialize:
+
+	function fightBar (scene)
+	{
+		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'fightBar');
+	},
+
+	spawn: function ()
+	{
+		this.setPosition(125, 560);
+	}
+});
+
+var energyBar = new Phaser.Class({
+	Extends: Phaser.GameObjects.Image,
+
+	initialize:
+
+	function energyBar (scene)
+	{
+		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'energyBar');
+	},
+
+	spawn: function ()
+	{
+		// var percent = 60;
+		// percent=percent/100;
+		// 
+		// this.x = 500;
+		this.setPosition(116, 558);
+		this.displayOriginX=0;
+		// this.body.setSize(30, 45);
+		// this.width = 20;
+		this.scaleX = 0;
+	},
+	update: function (time, delta)
+	{
+		if (this.scaleX < 1) {
+			this.scaleX += 0.001 * delta/6;
+		}	
+	}
+});
 
 var fightScene = new Phaser.Class({
 	Extends: Phaser.Scene,
-
     initialize:
 
     function fightScene ()
@@ -138,22 +199,17 @@ var fightScene = new Phaser.Class({
     },
     preload: function ()
     {
-	// this.load.spritesheet('dude', 
- //        'assets/dude.png',
- //        { frameWidth: 32, frameHeight: 48 }
- //    );
-	 // this.load.image('tilesb', 'assets/tiles.png');
-
     },
     create: function ()
     {
+
     var map2 = this.make.tilemap({key: 'map2'});
 
 	var tileset = map2.addTilesetImage('seiferGame2', 'tiles');
 
 	var backgroundLayer2 = map2.createDynamicLayer('SeiferLayer', tileset, 0, 0);
 
-	var fxs = this.sound.add('sfx2', {volume: 0.2});
+	var fxs = this.sound.add('sfx2', {volume: 0.1});
 	fxs.play();
 	// this.physics.add.image(500, 400, 'background').setScale(1.5);
 
@@ -163,9 +219,21 @@ var fightScene = new Phaser.Class({
 
     player = this.physics.add.sprite(400, 450, 'dude').setSize(16, 16).setOffset(8, 32);
 	player.setCollideWorldBounds(true);
+	enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
+	var svort = enemies.get().setActive(true).setVisible(true);
+	svort.spawn();
+	statusBar = this.physics.add.group({ classType: fightBar, runChildUpdate: true});
+	var statusBar = statusBar.get().setActive(true).setVisible(true);
+	statusBar.spawn();
+	bars = this.physics.add.group({ classType: energyBar, runChildUpdate: true });
+	var bar = bars.get().setActive(true).setVisible(true);
+	bar.spawn();
+
+	var textName = this.add.text(40, 548, 'Seifer');
+	// bar.charge();
 
 
-    }
+    },
 	});
 
 function fightFunc () {
