@@ -58,20 +58,18 @@ create: function ()
 	fx = this.sound.add('sfx', {volume: 0.2});
 	fx.play();
 	// this.physics.add.image(500, 400, 'background').setScale(1.5);
+
+	// blockedLayer.setCollisionByProperty({ collides: true });
+	blockedLayer.setCollisionBetween(1, 72);
+
 	player = this.physics.add.sprite(500, 50, 'dude').setSize(16, 16).setOffset(8, 32);
 	player.setCollideWorldBounds(true);
 
-	// backgroundLayer.setCollisionByProperty({ collides: true });
-	// map.setCollision(17);
 	this.physics.add.collider(player, blockedLayer);
 
 	const camera = this.cameras.main;
 	camera.startFollow(player, false);
 	camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-	// camera.roundPixels = false;
-	console.log(camera.roundPixels);
-
-	// this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heigthInPixels);
 
 	cursors = this.input.keyboard.createCursorKeys();
 
