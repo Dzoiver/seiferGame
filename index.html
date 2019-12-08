@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+    <title>RPG</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+    	body {
+            margin: 0;
+        }
+    </style>
+	</head>
+<body>
+
+<script type="text/javascript">
+
+var player;
+var fightFactor = 0;
+var fx;
+var randFightnumber = Phaser.Math.Between(300, 1200);
+
+// var Enemy = new Class
+
+var worldScene = new Phaser.Class({
+
+Extends: Phaser.Scene,
+
+initialize:
+
+function worldScene ()
+{
+	Phaser.Scene.call(this, {key: 'worldScene'})
+},
+
+preload: function ()
+{
+	this.load.image('background', 'assets/Cover.png');
+	 this.load.spritesheet('dude', 
+        'assets/dude.png',
+        { frameWidth: 32, frameHeight: 48 }
+    );
+	 this.load.image('tiles', 'assets/tiles.png');
+	 this.load.tilemapTiledJSON('map', 'map/map1.json');
+	 this.load.audio('sfx', 'music/03.mp3');
+	 	 this.load.tilemapTiledJSON('map2', 'map/map2.json');
+	 this.load.audio('sfx2', 'music/04.mp3');
+},
+
+create: function ()
+{
+	var map = this.make.tilemap({key: 'map'});
+
+	var tileset = map.addTilesetImage('seiferGame', 'tiles');
+
+	var backgroundLayer = map.createDynamicLayer('Background', tileset, 0, 0);
+	var blockedLayer = map.createDynamicLayer('blocked', tileset, 0, 0);
+
+	fx = this.sound.add('sfx', {volume: 0.2});
+	fx.play();
+	// this.physics.add.image(500, 400, 'background').setScale(1.5);
+	player = this.physics.add.sprite(500, 50, 'dude').setSize(16, 16).setOffset(8, 32);
+	player.setCollideWorldBounds(true);
+
+	// backgroundLayer.setCollisionByProperty({ collides: true });
+	// map.setCollision(17);
+	this.physics.add.collider(player, blockedLayer);
+
+	const camera = this.cameras.main;
+	camera.startFollow(player, false);
+	camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+	// camera.roundPixels = false;
+	console.log(camera.roundPixels);
+
+	// this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heigthInPixels);
+
+	cursors = this.input.keyboard.createCursorKeys();
+
+	this.anims.create({
+	    key: 'left',
+	    frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+	    frameRate: 10,
+	    repeat: -1
+	});
+
+	this.anims.create({
+	    key: 'turn',
+	    frames: [ { key: 'dude', frame: 4 } ],
+	    frameRate: 20
+	});
+
+	this.anims.create({
+	    key: 'right',
+	    frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+	    frameRate: 10,
+	    repeat: -1
+	});
+},
+
+update: function (time, delta)
+{
+	        player.setVelocity(0);
+	        // console.log(fightFactor);
+	    if (player.body.speed > 0) {
+	        fightFactor += 1;
+	        }
+	    if (fightFactor > randFightnumber) {
+	    	player.setTint(0xff0000);
+	    	fx.stop();
+	    	this.scene.start('fightScene');
+	    }
+	        // console.log(player.body.speed);
+	        if (cursors.left.isDown)
+        {
+            player.setVelocityX(-200);
+        }
+        else if (cursors.right.isDown)
+        {
+            player.setVelocityX(200);
+        }
+    
+        if (cursors.up.isDown)
+        {
+            player.setVelocityY(-200);
+        }
+        else if (cursors.down.isDown)
+        {
+            player.setVelocityY(200);
+        }
+},
+});
+
+var fightScene = new Phaser.Class({
+	Extends: Phaser.Scene,
+
+    initialize:
+
+    function fightScene ()
+    {
+    	Phaser.Scene.call(this, { key: 'fightScene'});
+    },
+    preload: function ()
+    {
+	// this.load.spritesheet('dude', 
+ //        'assets/dude.png',
+ //        { frameWidth: 32, frameHeight: 48 }
+ //    );
+	 // this.load.image('tilesb', 'assets/tiles.png');
+
+    },
+    create: function ()
+    {
+    var map2 = this.make.tilemap({key: 'map2'});
+
+	var tileset = map2.addTilesetImage('seiferGame2', 'tiles');
+
+	var backgroundLayer2 = map2.createDynamicLayer('SeiferLayer', tileset, 0, 0);
+
+	var fxs = this.sound.add('sfx2', {volume: 0.2});
+	fxs.play();
+	// this.physics.add.image(500, 400, 'background').setScale(1.5);
+
+	// backgroundLayer2.setCollisionByProperty({collides: true});
+	map2.setCollision(23);
+	this.physics.add.collider(player, backgroundLayer2);
+
+    player = this.physics.add.sprite(400, 450, 'dude').setSize(16, 16).setOffset(8, 32);
+	player.setCollideWorldBounds(true);
+
+
+    }
+	});
+
+function fightFunc () {
+	    if (player.body.speed > 0) {
+	        fightFactor += 1;
+	        }
+	    if (fightFactor > randFightnumber) {
+	    	player.setTint(0xff0000);
+	    	this.scene.start('fightScene');
+	    }
+}
+
+var config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 640,
+    pixelArt: true,
+    physics: {
+    	default: 'arcade',
+    	arcade: {
+    		debug: false
+    	}
+    },
+    scene: [worldScene, fightScene]
+};
+
+var game = new Phaser.Game(config);
+</script>
+</body>
+</html>
